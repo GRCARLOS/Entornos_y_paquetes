@@ -191,11 +191,11 @@ class GridControladorEnv(gym.Env): ##Heredamos de la clase gym
         self._agent_location = np.clip(             # Clip asegur aque no salgamos del grid.
             self._agent_location + direction, 0, self.size -1
         )
-
+        #Modificamos el umbral a 40% para forzar el estado terminated.
         #error_umbral=0.5 ## Def. un umbral de error para STEP.
-        error_umbral=15 ## umbral para alcanzar el estado terminated.
+        error_umbral=40 ##<<<----Dato modificado
 
-        ## Conf. figura para graficar
+        ## Conf. figura para graficars
         fig, ax = plt.subplots()
         fig.suptitle('Estimated Current in the motor')
         ax.set_xlim(0, 5000)
@@ -290,7 +290,8 @@ class GridControladorEnv(gym.Env): ##Heredamos de la clase gym
                 terminated=False
                 truncated= True
                 plt.close() #Linea nueva
-                print("Step. Iteración truncada debido a error porcentual mayor a 0.5%")
+                #print("Step. Iteración truncada debido a error porcentual mayor a 0.5%")
+                print(self._agent_error_porcentual)
             
 
 
@@ -387,12 +388,3 @@ class GridControladorEnv(gym.Env): ##Heredamos de la clase gym
 
 
         
-
-
-
-
-
-
-
-
-

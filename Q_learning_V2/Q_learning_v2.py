@@ -16,8 +16,6 @@ import time
 
 #import plotting ## Script original del windyworld.
 #matplotlib.style.use('ggplot')
-from gym.version import VERSION 
-print(VERSION)
 
 num_actions=4 ## Acciones posibles del agente.
 
@@ -32,23 +30,46 @@ def createEpsilonGreedyPolicy(Q, epsilon, num_actions):
     return policyFunction
 
 
-def qLearning(env, num_episodios, discount_factor=0.2, alpha=0.6, epsilon=0.9):
-    Q = defaultdict(lambda: np.zeros(4)) #Inicializamos a cero la tabla Q.
+def qLearning(env, num_episodios, discount_factor=0.2, alpha=0.6, epsilon=0.5):
+    print("Teclee alguna de las siguientes opciones, seguida de enter ")
+    print("1 si utilizamos tabla Q vacia, 2 si cargaremos condiciones iniciales de tabla Q")
+    dato=input()
+
+    if int(dato)==1:
+        Q = defaultdict(lambda: np.zeros(4)) #Inicializamos a cero la tabla Q.
+       
+    else:
+        print("Ingrese el nombre del archivo + .npy")
+        archivo_r=input()
+        #archivo="prueba_tabla_QII.csv"
+        #archivo="prueba.npy"
+        P=np.load(archivo_r, allow_pickle=True) ## Cargamos el objeto array que contiene al diccionario
+        #print(P)
+
+        #Recreamos el defaultdict con update
+        Q = defaultdict(lambda: np.zeros(4)) # Inicializamos todo a cero.
+        Q.update(P.item())
+        #QQ=pd.read_csv(archivo,header=None, index_col=0, squeeze=True).to_dict()
+        #Q.update(QQ)
+        print(Q)
+
+    print("Introduzca el nombre del archivo donde se respaldarn a la tabal Q, seguido de .npy")
+    archivo_w=input()
     
     # Se crea una politica epsilon-greedy
     policy= createEpsilonGreedyPolicy(Q, epsilon, num_actions) 
 
     # Iteramos sobre el numero de episodios
     for ith_episode in range(num_episodios):
-        posicion, info = env.reset() # Obtenemos una posición inicial (state) e info del errror porcentual.
+        posicion, info = env.reset(seed=42) # Obtenemos una posición inicial (state) e info del errror porcentual.
         shape=(env.size,env.size)  #shape=(10,10), dimensiones del grid para esta implementación.
         state = np.ravel_multi_index(tuple(posicion),shape) ## Devuelve el estado de "posición inicial" dentro de shape.
         
         time.sleep(0.1)
         # State generado en reset, inicializa la politica en la siguiente iteración.
 
-        #for t in itertools.count(): # .Count, itera indefinidamente, salvo que se agregue una condición.
-        for t in range(15):    
+        for t in itertools.count(): # .Count, itera indefinidamente, salvo que se agregue una condición.
+        #for t in range(15): ## Para prueba establecemos un num.finito de episodios.
             action_probabilities, best_action = policy(state) ## Obtememos probabilidades de acción y el indice de la mejor acción.
 
             ##------->>> Def. tipo acción: aleatoria (exploración) o e-greedy (explotación)
@@ -81,6 +102,9 @@ def qLearning(env, num_episodios, discount_factor=0.2, alpha=0.6, epsilon=0.9):
             td_delta = td_target - Q[state][action]
             Q[state][action] += alpha * td_delta
 
+            if t%50==0 :
+                np.save(archivo_w, np.array(dict(Q)))
+            
 
             if terminated: ## Reemplazar por terminated o truncated?
                 print("Se alcanzo un estado terminal!!")
@@ -89,17 +113,18 @@ def qLearning(env, num_episodios, discount_factor=0.2, alpha=0.6, epsilon=0.9):
                 time.sleep(1)
                 break
 
-            #if t==10:
-                #Q.to_csv("prueba_tabla_Q.csv", index=False)## <<<<----Modificación
-                #print(type(Q))
-
             state = next_state #Actualizamos state
     env.close()
     return Q
 
 
+
+
+
 env=GridControladorEnv(render_mode="human")
 
 Q=qLearning(env,3) #Entrenamiento para 3 episodios.
-print(Q)
 
+print(Q) 
+
+## Revisar esta última parte y tratar de manener el trabajo con csv y dataframe.
