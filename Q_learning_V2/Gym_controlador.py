@@ -230,6 +230,7 @@ class GridControladorEnv(gym.Env): ##Heredamos de la clase gym
 
     # ---------------------------Definimos ganancias del controlador PI-----------------------------------
         ganancias=self._agent_location
+        print("ganancias", ganancias)
     #---------------------------------------------------------------------------------------------------
         ### Def. condición inicial para la integral del error controlador PI
         E_integral= 0 
