@@ -13,10 +13,12 @@ import sys
 import random as rd
 import time
 
-## Implementación de Q learnig en sistema controladora motor, en este entorno las acciones aún son 
-## discretas, pero se ha logrado actualizar acciones (valor de ganancias), para cada paso de tiempo.
-## Es necesario modificar:
-# ---- Acciones a valores o incrementos más pequeños
+## Implementación de Q learnig en sistema controladora motor, en este entorno las acciones 
+# aún son discretas, pero se ha creado un esapcio de size*size, donde size=100 0 1000 según
+# sea el caso, esto permite ampliar el espacio de busqueda.
+# La diferencia con  las versiones anteriores, es que las ganancias aplicadas se dividen por
+# 10 0  100, esto permite que en la practica se aplique incrementos de 0.1 o 0.01 al PI, 
+# manteniendo el espacio discreto. 
 #----- El umbral esta en 40 para forzar el estado terminal, debe ser mucho menor
 #----- Quiza definer una estrategia que permita cuantificar mejor el error, es decir, cuando
 #------  un valor de error por debajo del umbral se repita por un periódo de tiempo decir entonces
@@ -93,7 +95,7 @@ def qLearning(env,num_actions, num_episodios, discount_factor, alpha, epsilon,er
         for t in itertools.count(): 
             i=t+1 # ya que i=0 corresponde a condiciones iniciales
             action=action_type(policy, state, epsilon)
-            print('Q learning, action dentro loop inf',action)
+            #print('Q learning, action dentro loop inf',action)
 
             x_sol=x_sol_q[i-1][:] #<<-vector 1x3, i,pos, vel o tambien x_sol=x_sol_q[0] toda la fila 0
             I_error= I_reference - x_sol_q[i-1][0] #Error en corriente
@@ -120,7 +122,7 @@ def qLearning(env,num_actions, num_episodios, discount_factor, alpha, epsilon,er
                 print("Se alcanzo un estado terminal!!!")
                 print(" Con un error porcentual de:", info)
                 #env.render()
-                time.sleep(1)
+                time.sleep(2)
                 break
             elif truncated:
                 print("Truncado por rebasar Imax u obtener un valor NAN")
@@ -135,9 +137,9 @@ env=GridControladorEnvII() ## Falta revisar la parte de renderizado.
 
 num_actions=4
 num_episodios=500
-discount_factor=0.2
+discount_factor=0.3
 alpha=0.6
-epsilon=0.5
+epsilon=0.2
 
 error_umbral=40
 h=0.001 #Tamaño del paso
@@ -156,5 +158,3 @@ Tl=0 # Entradas externas, podría cambiar para simular una interacción o pertur
 Q=qLearning(env,num_actions,num_episodios, discount_factor, alpha, epsilon,error_umbral,h,I_reference,x0,Tl) 
 
 print(Q) 
-
-## Revisar esta última parte y tratar de manener el trabajo con csv y dataframe.

@@ -13,29 +13,37 @@ class GridControladorEnvII(gym.Env): ##Heredamos de la clase gym
 
 ###------------>>>> Metodos init <<<<-----------------
     #def __init__(self, render_mode= None, size=10):
-    def __init__(self,size=10):
+    def __init__(self,size=1000):
         self.size= size #Tamaño del grid
-        self.window_size=512 # Tamaño de la ventana
+        #self.window_size=512 # Tamaño de la ventana
         
         #Def. observaciones como diccionario con la ubicación del agente.
-        self.observation_space= spaces.Dict(
-            {
-                "agent": spaces.Box(0, size-1, shape=(2,), dtype=int),
-            }
-        )
+        # self.observation_space= spaces.Dict(
+        #     {
+        #         "agent": spaces.Box(0, size-1, shape=(2,), dtype=int),
+        #     }
+        # )
 
         #Def. 4 acciones, "right","left", "up","down" para moverse en el plano kp-ki.
-        self.action_space=spaces.Discrete(4)
 
+        self.action_space=spaces.Discrete(4)
+        
         """ El siguiente diccionario mapea las acciones de'self.action_space' en la dirección
         en la que debe moverse el agente si determinada acción es tomada. I.e. 0 corresponde a
         moverse a la derecha (right), 1 moverse hacia arriba (up), etc. """
+
+        # self._action_to_direction = {
+        #     0: np.array([1, 0]),    # Derecha
+        #     1: np.array([0, 1]),    # Arriba
+        #     2: np.array([-1, 0]),   # Izquierda
+        #     3: np.array([0,-1]),    # Abajo
+        # }
 
         self._action_to_direction = {
             0: np.array([1, 0]),    # Derecha
             1: np.array([0, 1]),    # Arriba
             2: np.array([-1, 0]),   # Izquierda
-            3: np.array([0,-1]),    # Abajo
+            3: np.array([0, 1]),    # Abajo
         }
 
        # assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -89,7 +97,7 @@ class GridControladorEnvII(gym.Env): ##Heredamos de la clase gym
         super().reset(seed=seed)
         self._agent_location = self.np_random.integers(0, self.size, size=2,dtype=int)
         #self._agent_location=np.array([9, 5]) # Esta ubicación inicial rompia el programa
-        print("Reset. Ubicación inicial del agente",self._agent_location, type(self._agent_location))
+        print("Reset. Ubicación inicial ",self._agent_location)
         
         #observation = self._get_obs()
         # info = self._get_info() La comentamos, generara error al haber quitado la parte que calculaba el error porcentual.
@@ -111,10 +119,13 @@ class GridControladorEnvII(gym.Env): ##Heredamos de la clase gym
         )
 
 
-        #print('acción', direction)
-        #print('step agent location actualizada', self._agent_location)
+        #print('step acción', direction)
+        print('step, acción- location actualizada', direction, self._agent_location)
     #-->>>En esta parte estaba el for
-        ganancias=self._agent_location
+        GX=self._agent_location/100
+        print('Gananci aplicada ',GX)
+        #ganancias=self._agent_location
+        ganancias=GX
         u=self._PI_control(ganancias,I_error, E_integral)    # Control signal
 
     #Calc. terminos de RK-DP para el paso de tiempo actual
@@ -149,21 +160,15 @@ class GridControladorEnvII(gym.Env): ##Heredamos de la clase gym
                 terminated=True
                 truncated=False
                 reward=1
-                print("Step. Terminado.Error por debajo del umbral", self._agent_error_porcentual)
+                print("Step CII. Terminado. Ep debajo de umbral", self._agent_error_porcentual)
 
             else:
                 terminated=False
                 truncated= False
                 reward=0
-                print("Error porcentual",self._agent_error_porcentual) ##-- REVISAR función de recompensa.
+                #print("Step CIII, Ep",self._agent_error_porcentual) ##-- REVISAR función de recompensa.
             
             ## >>>> Pendiente la parte de renderizado.-->>>>>
 
     # observation =agent_location
         return self._agent_location, reward,terminated, truncated,x_sol_next, self._agent_error_porcentual
-
-
-
-
-
-   

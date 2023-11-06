@@ -13,6 +13,12 @@ import sys
 import random as rd
 import time
 
+## En esta versión se busco corregir el hecho de que al asignar seed=None, y obtener con reset
+## una posición [9 5], se generaba un error con self._agent_error_porcentual en el if que 
+## definía el caso especial de salida del loop infinito.
+## Lo que se realizo, fue mover el calculo de self._agent_error_porcentual antes de los if, para
+## tener el calculo del error sin importar el if o caso.
+
 num_actions=4 ## Acciones posibles del agente.
 
 def createEpsilonGreedyPolicy(Q, epsilon, num_actions):
